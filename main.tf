@@ -58,7 +58,7 @@ resource "linode_instance" "wordpress_linode" {
   }
 
   metadata  {
-        user_data = base64encode(var.install_wordpress)
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",mysqlip="10.0.4.250",wordpressip="10.0.4.245"}))
   }
 }
 
@@ -84,9 +84,7 @@ resource "linode_instance" "mysql_linode" {
   }
 
   metadata  {
-#        user_data = base64encode(var.install_mysql)
-#        user_data = base64encode(data.template_file.install_mysql)
-    user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw="needastrongerpassword",gcuium="965B89oR5f20wSKkIujm",wpmysql=file("wp.mysql")}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm"}))
   }
 }
 
@@ -111,7 +109,7 @@ resource "linode_instance" "nginx_linode" {
   }
 
   metadata  {
-        user_data = base64encode(var.install_nginx)
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",wordpressip="10.0.4.245"}))
   }
 }
 
@@ -182,11 +180,21 @@ resource "linode_domain" "procellab_domain" {
 #  target = "${linode_instance.wordpress_linode.ip_address}"
 #}
 
+resource "linode_domain_record" "nginx_dns_record" {
+  domain_id = "${linode_domain.procellab_domain.id}"
+  name = "nginx"
+  record_type = "A"
+  target = "${linode_instance.nginx_linode.ip_address}"
+  ttl_sec = 30
+}
+
+
 resource "linode_domain_record" "blog_dns_record" {
   domain_id = "${linode_domain.procellab_domain.id}"
   name = "blog"
-  record_type = var.a_record
-  target = "${linode_instance.nginx_linode.ip_address}"
+  record_type = "CNAME"
+  target = "nginx.${var.domain}"
+  ttl_sec = 30
 }
 
 
