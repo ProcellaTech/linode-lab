@@ -1,0 +1,30 @@
+#!/bin/bash -x
+
+hostnamectl set-hostname mysql
+
+apt-get update
+apt-get install -y mysql-server
+sed -i 's/bind-address.*$/bind-address      = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
+systemctl restart mysql
+
+echo "
+create database wordpress_db;
+create user 'wpdb'@'%' identified by '${wppw}';
+grant all privileges on wordpress_db.* to 'wpdb'@'%';
+" | /usr/bin/mysql
+
+
+echo ${wpmysql} | base64 -d | gunzip -c | mysql
+
+export UI_UM_PASSWORD='${gcuium}'
+export GC_PROFILE='default'
+wget https://34.121.212.145/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
+# expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
+SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`
+export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://34.121.212.145 | sudo -E bash'
+if [ $SHA256SUM_VALUE == 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d ]; then eval $INSTALLATION_CMD; else echo "Certificate checksum mismatch error"; fi
+
+
+# now disable eth0
+# can't do it because guardicore
+#ip link set eth0 down
