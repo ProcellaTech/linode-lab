@@ -18,10 +18,10 @@ curl -L https://github.com/ProcellaTech/linode-lab/raw/main/wp.mysql | base64 -d
 
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
-wget https://34.121.212.145/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
+wget https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
 # expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
 SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`
-export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://34.121.212.145 | sudo -E bash'
+export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://${gcagg} | sudo -E bash'
 if [ $SHA256SUM_VALUE == 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d ]; then eval $INSTALLATION_CMD; else echo "Certificate checksum mismatch error"; fi
 
 
