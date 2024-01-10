@@ -58,7 +58,7 @@ resource "linode_instance" "wordpress_linode" {
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",mysqlip="10.0.4.250",wordpressip="10.0.4.245"}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",mysqlip="10.0.4.250",wordpressip="10.0.4.245"}))
   }
 }
 
@@ -84,7 +84,7 @@ resource "linode_instance" "mysql_linode" {
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm"}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm"}))
   }
 }
 
@@ -109,7 +109,7 @@ resource "linode_instance" "nginx_linode" {
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {wppw="needastrongerpassword",gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",wordpressip="10.0.4.245"}))
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",wordpressip="10.0.4.245"}))
   }
 }
 
@@ -161,6 +161,19 @@ resource "onepassword_item" "nginx_root" {
     symbols = false
   }
 }
+
+resource "onepassword_item" "mysql_db" {
+  vault = var.Linode-lab
+
+  title    = "db password"
+  category = "password"
+
+  password_recipe {
+    length  = 40
+    symbols = false
+  }
+}
+
 
 resource "linode_sshkey" "procellab_sshkey" {
   label = "Procellab_SSH_Key"
