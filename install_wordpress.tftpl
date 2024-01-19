@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 
-hostnamectl set-hostname wordpress
+hostnamectl set-hostname ${wordpressname}
 
 apt-get update
 apt-get install -y wordpress
@@ -24,7 +24,7 @@ echo "
 
   require_once ABSPATH . 'wp-settings.php';
 
-" > /etc/wordpress/config-${wordpressip}.php
+" > /etc/wordpress/config-${wordpressname}.php
 
 sed -i 's!/var/www/html!/usr/share/wordpress!' /etc/apache2/sites-enabled/000-default.conf
 
@@ -33,6 +33,7 @@ systemctl restart apache2
 
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
+export GC_PROXY_HTTPS='${proxy}:443'
 wget https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
 # expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
 SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`

@@ -29,6 +29,11 @@ data "onepassword_item" "token" {
   uuid = "iavygzndgytesbvjaautylg4ly"
 }
 
+data "onepassword_item" "gcuium" {
+  vault = var.Linode-lab
+  uuid = "ea7fghtxoc7bbo3zn2npn6pohy"
+}
+
 # I wanted to have no NAT 1:1 but there's no cloud gateway, I can't build
 # my own nat gateway and i can't access the metadata service to configure
 # proxies without having the proxy configured.  so we're going to go with 
@@ -36,6 +41,61 @@ data "onepassword_item" "token" {
 
 # I also need to find a way to extract the vpc IP assigned so i don't have
 # to statically assign (and we can use DNS records instead)
+
+
+# ok, so we can boot up with public interface, in the metadata tell guardicore
+# agent to use a proxy and then disable the public interface elsewhere.  Let's 
+# see if it works!
+
+
+resource "linode_instance" "lab_proxy" {
+  image = var.image
+  label = "proxy"
+  region = var.region
+  type = var.type
+  
+  authorized_keys = [ linode_sshkey.procellab_sshkey.ssh_key ]
+  root_pass = onepassword_item.proxy_root.password
+
+  interface {
+    purpose = "public"
+  }
+
+  interface {
+    purpose = "vpc"
+    subnet_id = linode_vpc_subnet.gc-procellab.id
+  }
+
+  metadata  {
+    user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {}))
+  }
+}
+
+data "linode_instances" "proxy" {
+  depends_on = [linode_instance.lab_proxy]
+  filter {
+    name = "label"
+    values = [ "proxy" ]
+  }
+}
+
+
+locals {
+  proxy_ip = data.linode_instances.proxy.instances.0.config.0.interface.1.ipv4.0.vpc
+  wordpress_ip = data.linode_instances.wordpress.instances.0.config.0.interface.1.ipv4.0.vpc
+  nginx_ip = data.linode_instances.nginx.instances.0.config.0.interface.1.ipv4.0.vpc
+  mysql_ip = data.linode_instances.mysql.instances.0.config.0.interface.1.ipv4.0.vpc
+}
+
+resource "linode_domain_record" "proxy_dns_record" {
+  domain_id = "${linode_domain.procellab_domain.id}"
+  name = "proxy"
+  record_type = "A"
+  ttl_sec = 30
+  target = "${local.proxy_ip}"
+}
+
+
 
 resource "linode_instance" "wordpress_linode" {
   image = var.image
@@ -52,15 +112,14 @@ resource "linode_instance" "wordpress_linode" {
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
-    ipv4 {
-      vpc = "10.0.4.245"
-    }
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",mysqlip="10.0.4.250",wordpressip="10.0.4.245"}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password,mysqlip=local.mysql_ip,wordpressname="wordpress.${var.domain}", proxy=local.proxy_ip}))
   }
 }
+
+
 
 resource "linode_instance" "mysql_linode" {
   image = var.image
@@ -78,13 +137,10 @@ resource "linode_instance" "mysql_linode" {
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
-    ipv4 {
-      vpc = "10.0.4.250"
-    }
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm"}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
   }
 }
 
@@ -103,13 +159,10 @@ resource "linode_instance" "nginx_linode" {
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
-    ipv4 {
-      vpc = "10.0.4.240"
-    }
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {gcagg="34.121.212.145",gcuium="965B89oR5f20wSKkIujm",wordpressip="10.0.4.245"}))
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password,wordpressip=local.wordpress_ip, proxy=local.proxy_ip}))
   }
 }
 
@@ -125,6 +178,19 @@ resource "linode_vpc_subnet" "gc-procellab" {
     label = "gc-procellab-subnet"
     ipv4 = "10.0.4.0/24"
 }
+
+resource "onepassword_item" "proxy_root" {
+  vault = var.Linode-lab
+
+  title    = "Proxy root"
+  category = "password"
+
+  password_recipe {
+    length  = 40
+    symbols = false
+  }
+}
+
 
 resource "onepassword_item" "wordpress_root" {
   vault = var.Linode-lab
@@ -186,21 +252,23 @@ resource "linode_domain" "procellab_domain" {
   type = "master"
 }
 
-#resource "linode_domain_record" "wordpress_dns_record" {
-#  domain_id = "${linode_domain.procellab_domain.id}"
-#  name = "wordpress"
-#  record_type = var.a_record
-#  target = "${linode_instance.wordpress_linode.ip_address}"
-#}
 
 resource "linode_domain_record" "nginx_dns_record" {
   domain_id = "${linode_domain.procellab_domain.id}"
   name = "nginx"
   record_type = "A"
-  target = "${linode_instance.nginx_linode.ip_address}"
+  target = "${local.nginx_ip}"
   ttl_sec = 30
 }
 
+
+resource "linode_domain_record" "wordpress_dns_record" {
+  domain_id = "${linode_domain.procellab_domain.id}"
+  name = "wordpress"
+  record_type = "A"
+  target = "${local.wordpress_ip}"
+  ttl_sec = 30
+}
 
 resource "linode_domain_record" "blog_dns_record" {
   domain_id = "${linode_domain.procellab_domain.id}"
@@ -231,7 +299,27 @@ resource "linode_firewall" "my_firewall" {
 }
 
 
-data "linode_instance_networking" "example" {
-    linode_id = linode_instance.wordpress_linode.id
+data "linode_instances" "wordpress" {
+  depends_on = [linode_instance.wordpress_linode]
+  filter {
+    name = "label"
+    values = [ "wordpress-app" ]
+  }
+}
+
+data "linode_instances" "nginx" {
+  depends_on = [linode_instance.nginx_linode]
+  filter {
+    name = "label"
+    values = [ "nginx-app" ]
+  }
+}
+
+data "linode_instances" "mysql" {
+  depends_on = [linode_instance.mysql_linode]
+  filter {
+    name = "label"
+    values = [ "mysql-app" ]
+  }
 }
 

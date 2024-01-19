@@ -1,0 +1,51 @@
+#!/bin/bash -x
+
+
+hostnamectl set-hostname proxy
+
+apt-get update
+apt-get install -y libapache2-mod-proxy-uwsgi
+
+cd /etc/apache2/mods-enabled
+ln -s ../mods-available/proxy.load
+ln -s ../mods-available/proxy_connect.load
+ln -s ../mods-available/ssl.load
+ln -s ../mods-available/ssl.conf
+ln -s ../mods-available/socache_shmcb.load
+
+echo "
+<IfModule mod_proxy.c>
+        ProxyRequests On
+        AllowCONNECT 443
+        <Proxy *>
+           AddDefaultCharset off
+           Require ip 10
+        </Proxy>
+</IfModule>        
+" > proxy.conf
+
+cd /etc/apache2/sites-enabled
+
+echo "
+<IfModule mod_ssl.c>
+        <VirtualHost _default_:443>
+                ServerAdmin webmaster@localhost
+                ServerName proxy
+                DocumentRoot /var/www/html
+                ErrorLog \$\{APACHE_LOG_DIR}/error.log
+                CustomLog \$\{APACHE_LOG_DIR}/access.log combined
+                SSLEngine on
+                                SSLCertificateFile      /etc/ssl/certs/ssl-cert-snakeoil.pem
+                SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+                        AllowCONNECT 443
+        <Proxy *>
+        Require ip 10
+        </Proxy>
+        
+        </VirtualHost>
+</IfModule>
+
+                
+"> proxy.conf
+
+apachectl restart
