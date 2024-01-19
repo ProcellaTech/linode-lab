@@ -117,6 +117,12 @@ resource "linode_instance" "wordpress_linode" {
   metadata  {
   user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password,mysqlip=local.mysql_ip,wordpressname="wordpress.${var.domain}", proxy=local.proxy_ip}))
   }
+  
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./delete_agent.py wordpress"
+  }
+  
 }
 
 
@@ -142,6 +148,12 @@ resource "linode_instance" "mysql_linode" {
   metadata  {
   user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {wppw=onepassword_item.mysql_db.password,gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
   }
+  
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./delete_agent.py mysql"
+  }
+  
 }
 
 resource "linode_instance" "nginx_linode" {
@@ -164,6 +176,11 @@ resource "linode_instance" "nginx_linode" {
   metadata  {
   user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {gcagg="34.121.212.145",gcuium=data.onepassword_item.gcuium.password,wordpressip=local.wordpress_ip, proxy=local.proxy_ip}))
   }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./delete_agent.py nginx"
+  }
+  
 }
 
 # Create a VPC and a subnet
