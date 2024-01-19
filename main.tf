@@ -120,7 +120,7 @@ resource "linode_instance" "wordpress_linode" {
   
   provisioner "local-exec" {
     when    = destroy
-    command = "./delete_agent.py wordpress"
+    command = "./delete_agent.py wordpress.${var.domain}"
   }
   
 }
