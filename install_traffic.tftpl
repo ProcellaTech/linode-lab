@@ -1,0 +1,29 @@
+#!/bin/bash -x
+
+# I'd like to just get a copy of all the IP addresses I can find
+
+hostnamectl set-hostname ${label}
+
+apt-get update
+apt-get install -y mysql-client curl
+
+echo "
+#!/bin/bash -x
+
+
+for IP in ${lab_ips}
+do
+   curl -A 'traffic_generator' -s http://$IP/
+   
+   # this should always fail
+   mysql --host $IP --username traffic_generator --password traffic_generator wordpress_db
+done
+
+" > /root/generate_traffic.sh
+
+chmod +x /root/generate_traffic.sh
+
+
+
+# now disable eth0
+#ip link set eth0 down

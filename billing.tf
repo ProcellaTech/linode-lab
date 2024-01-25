@@ -122,6 +122,7 @@ locals {
   billing_app_ip = data.linode_instances.billing_app.instances.0.config.0.interface.1.ipv4.0.vpc
   billing_web_ip = data.linode_instances.billing_web.instances.0.config.0.interface.1.ipv4.0.vpc
   billing_db_ip = data.linode_instances.billing_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  billing_ips = concat([local.billing_app_ip],[local.billing_web_ip],[local.billing_db_ip])
 }
 
 

@@ -122,6 +122,7 @@ locals {
   accounting_app_ip = data.linode_instances.accounting_app.instances.0.config.0.interface.1.ipv4.0.vpc
   accounting_web_ip = data.linode_instances.accounting_web.instances.0.config.0.interface.1.ipv4.0.vpc
   accounting_db_ip = data.linode_instances.accounting_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  accounting_ips = concat([local.accounting_app_ip],[local.accounting_web_ip],[local.accounting_db_ip])
 }
 
 

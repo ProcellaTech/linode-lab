@@ -122,6 +122,7 @@ locals {
   crm_app_ip = data.linode_instances.crm_app.instances.0.config.0.interface.1.ipv4.0.vpc
   crm_web_ip = data.linode_instances.crm_web.instances.0.config.0.interface.1.ipv4.0.vpc
   crm_db_ip = data.linode_instances.crm_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  crm_ips = concat([local.crm_app_ip],[local.crm_web_ip],[local.crm_db_ip])
 }
 
 
