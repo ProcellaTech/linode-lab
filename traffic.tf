@@ -22,7 +22,8 @@ resource "linode_instance" "traffic_generator" {
 }
 
 locals {
-  all_ips = join(" ",concat(local.accounting_ips,local.crm_ips,local.billing_ips))
+#  all_ips = join(" ",concat(local.accounting_ips,local.crm_ips,local.billing_ips))
+  all_ips = join(" ",concat(local.accounting_ips,local.billing_ips))
 }
 
 # generate a unique password for root and store it in 1password
