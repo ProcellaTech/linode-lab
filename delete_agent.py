@@ -75,7 +75,7 @@ def gc_assets(host):
 
   assets=[]
   for a in result.json()['objects']:
-      if a['name'] == host:
+      if a['name'] == host or a['name'] == host.replace('_','-'):
           assets.append({ 'asset_id': a['id']})
 
   return assets
