@@ -18,7 +18,7 @@ resource "linode_instance" "billing_app" {
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="billing-app",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.billing_db_ip,wordpressname="billing-app.${var.domain}", proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="billing-app",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.billing_db_ip,domain=var.domain, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {

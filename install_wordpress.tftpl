@@ -24,7 +24,7 @@ echo "
 
   require_once ABSPATH . 'wp-settings.php';
 
-" > /etc/wordpress/config-${wordpressname}.php
+" > /etc/wordpress/config-${domain}.php
 
 sed -i 's!/var/www/html!/usr/share/wordpress!' /etc/apache2/sites-enabled/000-default.conf
 
