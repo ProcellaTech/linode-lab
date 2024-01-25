@@ -34,6 +34,12 @@ resource "linode_instance" "lab_proxy" {
   metadata  {
     user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {label="proxy",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password}))
   }
+  
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./delete_agent.py ${self.label}"
+  }
+  
 }
 
 
