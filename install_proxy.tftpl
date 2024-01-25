@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 
-hostnamectl set-hostname proxy
+hostnamectl set-hostname ${label}
 
 apt-get update
 
@@ -20,6 +20,9 @@ ConnectPort 443
 Port 8443
 Allow 10.0.4.0/24
 ' > /etc/tinyproxy/tinyproxy.conf
+
+touch /var/log/tinyproxy/tinyproxy.log
+chown tinyproxy.tinyproxy /var/log/tinyproxy/tinyproxy.log
 
 systemctl restart tinyproxy
 
