@@ -11,13 +11,30 @@ echo "
 #!/bin/bash -x
 
 
-for IP in ${lab_ips}
+for IP in ${accounting_ips}
 do
-   curl -A 'traffic_generator' -s http://$IP/
+   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: accounting.linode.procellab.zone'
    
    # this should always fail
-   mysql --host $IP --username traffic_generator --password traffic_generator wordpress_db
+   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
 done
+
+for IP in ${billing_ips}
+do
+   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: billing.linode.procellab.zone'
+   
+   # this should always fail
+   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
+done
+
+for IP in ${crm_ips}
+do
+   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: crm.linode.procellab.zone'
+   
+   # this should always fail
+   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
+done
+
 
 " > /root/generate_traffic.sh
 
@@ -26,4 +43,4 @@ chmod +x /root/generate_traffic.sh
 
 
 # now disable eth0
-#ip link set eth0 down
+ip link set eth0 down

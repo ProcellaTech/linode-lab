@@ -17,13 +17,8 @@ resource "linode_instance" "traffic_generator" {
   }
 
   metadata  {
-    user_data = base64encode(templatefile("${path.module}/install_traffic.tftpl", {label="traffic-generator",lab_ips=local.all_ips}))
+    user_data = base64encode(templatefile("${path.module}/install_traffic.tftpl", {label="traffic-generator",accounting_ips=join(" ",local.accounting_ips),billing_ips=join(" ",local.billing_ips),crm_ips=join(" ",local.crm_ips)}))
   }
-}
-
-locals {
-#  all_ips = join(" ",concat(local.accounting_ips,local.crm_ips,local.billing_ips))
-  all_ips = join(" ",concat(local.accounting_ips,local.billing_ips))
 }
 
 # generate a unique password for root and store it in 1password
