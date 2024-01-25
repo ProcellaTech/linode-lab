@@ -28,18 +28,8 @@ variable "type" {
   default = "g6-nanode-1"
 }
 
-variable "install_wordpress" {
-  description = "install and configure wordpress"
-  default = <<-EOF
-  
-EOF
-}
-
-
-variable "install_nginx" {
-  description = "install and configure nginx"
-  default = <<-EOF
-  
-EOF
+variable "gcagg_ip" {
+  description = "IP address of GC aggregator - password in 1password"
+  default = "34.121.212.145"
 }
 
