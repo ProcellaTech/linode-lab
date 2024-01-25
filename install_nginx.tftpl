@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 
-hostnamectl set-hostname nginx
+hostnamectl set-hostname ${label}
 
 apt-get update
 apt-get install -y nginx
@@ -14,6 +14,7 @@ server {
 	server_name blog.linode.procellab.zone;
 	location / {
 		proxy_pass http://${wordpressip}/;
+        proxy_set_header Host ${wordpressname};
 	}
 }
 " >/etc/nginx/sites-enabled/default
