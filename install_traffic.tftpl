@@ -13,32 +13,36 @@ echo "
 
 for IP in ${accounting_ips}
 do
-   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: accounting.linode.procellab.zone'
+   curl -q -A 'traffic_generator' -s http://\$IP/ -H 'Host: accounting.linode.procellab.zone'
    
    # this should always fail
-   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
+   mysql --host \$IP --user traffic_generator --password=traffic_generator wordpress_db
 done
 
 for IP in ${billing_ips}
 do
-   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: billing.linode.procellab.zone'
+   curl -q -A 'traffic_generator' -s http://\$IP/ -H 'Host: billing.linode.procellab.zone'
    
    # this should always fail
-   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
+   mysql --host \$IP --user traffic_generator --password=traffic_generator wordpress_db
 done
 
 for IP in ${crm_ips}
 do
-   curl -A 'traffic_generator' -s http://\$IP/ -H 'Host: crm.linode.procellab.zone'
+   curl -q -A 'traffic_generator' -s http://\$IP/ -H 'Host: crm.linode.procellab.zone'
    
    # this should always fail
-   mysql --host \$IP --username traffic_generator --password traffic_generator wordpress_db
+   mysql --host \$IP --user traffic_generator --password=traffic_generator wordpress_db
 done
 
 
 " > /root/generate_traffic.sh
 
 chmod +x /root/generate_traffic.sh
+
+echo "
+* * * * 0 root /root/generate_traffic.sh >> /var/log/generate_traffic.log 2>&1
+" > /etc/cron.d/generate_traffic
 
 
 
