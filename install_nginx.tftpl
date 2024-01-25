@@ -6,12 +6,13 @@ hostnamectl set-hostname ${label}
 apt-get update
 apt-get install -y nginx
 
+TMPNAME=$(echo ${wordpressname} | sed 's/-app//')
 echo "
 server {
         listen 80 default_server;
         listen [::]:80 default_server;
         root /var/www/html;
-	server_name blog.linode.procellab.zone;
+	server_name $TMPNAME;
 	location / {
 		proxy_pass http://${wordpressip}/;
         proxy_set_header Host ${wordpressname};
