@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-hostnamectl set-hostname mysql
+hostnamectl set-hostname ${label}
 
 apt-get update
 apt-get install -y mysql-server
