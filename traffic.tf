@@ -5,7 +5,7 @@ resource "linode_instance" "traffic_generator" {
   type = var.type
   
   authorized_keys = [ linode_sshkey.procellab_sshkey.ssh_key ]
-  root_pass = onepassword_item.proxy_root.password
+  root_pass = onepassword_item.traffic_root.password
 
   interface {
     purpose = "public"
