@@ -41,7 +41,7 @@ done
 chmod +x /root/generate_traffic.sh
 
 echo "
-* * * * 0 root /root/generate_traffic.sh >> /var/log/generate_traffic.log 2>&1
+* * * * * root /root/generate_traffic.sh >> /var/log/generate_traffic.log 2>&1
 " > /etc/cron.d/generate_traffic
 
 
