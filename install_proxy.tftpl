@@ -5,7 +5,7 @@ hostnamectl set-hostname ${label}
 
 apt-get update
 
-apt-get install -y tinyproxy
+apt-get install -y tinyproxy docker.io
 
 
 echo '
@@ -33,4 +33,18 @@ wget https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /t
 SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`
 export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://${gcagg} | sudo -E bash'
 if [ $SHA256SUM_VALUE == 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d ]; then eval $INSTALLATION_CMD; else echo "Certificate checksum mismatch error"; fi
+
+
+
+# this is just for web/rdp/ssh not client 
+# see https://techdocs.akamai.com/eaa/docs/install-a-docker-based-connector to enable client type
+
+
+wget '${eaaconn}' -O /tmp/eaaconnector.tgz
+docker load < /tmp/eaaconnector.tgz
+
+IMAGEID=$(docker images | grep ^akamai_docker | awk '{ print $3 }')
+docker volume create EAA_Volume
+CONTAINER=$(docker run --name proxy-linode --restart=always --volume EAA_Volume:/opt/wapp -d $IMAGEID)
+docker commit $CONTAINER linode-proxy
 

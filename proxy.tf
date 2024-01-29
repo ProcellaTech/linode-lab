@@ -32,12 +32,12 @@ resource "linode_instance" "lab_proxy" {
   }
 
   metadata  {
-    user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {label="proxy",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password}))
+    user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {label="proxy",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,eaaconn=data.external.eaa_connector.result.download_url}))
   }
   
   provisioner "local-exec" {
     when    = destroy
-    command = "./delete_agent.py ${self.label}"
+    command = "${path.module}/delete_agent_and_connector.sh ${self.label}"
   }
   
 }
@@ -84,3 +84,27 @@ resource "onepassword_item" "proxy_root" {
 }
 
 
+# this will create the EAA connector and return the download URL and agentid in JSON
+data "external" "eaa_connector" {
+  program = [
+    "${path.module}/install_eaa_connector.py", "proxy",
+  ]
+  query = {
+    # You can pass something to STDIN of your program here, 
+    # but as per current version, the input will be given as JSON (map of string)
+  }
+}
+
+output "connector" {
+  value = data.external.eaa_connector.result
+}
+
+# this will approve the EAA connector
+resource "null_resource" "approve_connector" {
+  # make sure proxy is up
+  depends_on = [linode_instance.lab_proxy]
+  
+  provisioner "local-exec" {
+      command = "${path.module}/approve_eaa_connector.py proxy"
+  }
+}
