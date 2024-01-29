@@ -88,7 +88,7 @@ def gc_bulk_deactivate_asset(assetids):
 if __name__ == '__main__':
 
    parser = argparse.ArgumentParser(description='remove asset from GC')
-   parser.add_argument('name', help='asset name eg: foo.procellab.zone')
+   parser.add_argument('name', help='asset name eg: foo.procellab.zone', nargs=1)
    args = parser.parse_args()
 
    vault="jjkz7xwzfg67whlw2cex2tedxa" # Linode Lab vault
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         GC_PASS = u['value']
 
 
-   assets=gc_assets(args.name)
+   assets=gc_assets(args.name[0])
    if len(assets) > 0:
      gc_bulk_deactivate_asset(assets)
 
