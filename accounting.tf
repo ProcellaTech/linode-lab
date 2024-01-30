@@ -182,7 +182,7 @@ resource "null_resource" "eaa_accounting" {
   }
   provisioner "local-exec" {
     when    = destroy
-    command = "${path.module}/unpublish.py accounting"
+    command = "${path.module}/unpublish_app.py accounting"
   }  
 }
 
