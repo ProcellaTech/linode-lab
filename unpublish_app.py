@@ -51,6 +51,8 @@ for app in result.json()['objects']:
     if app['name'] == args.name[0]:
       appid=app['uuid_url']
 
-
+print("deleting %s" % args.name[0])
 deleteresult = s.delete(urljoin(baseurl, '/crux/v1/mgmt-pop/apps/%s' % appid))
 
+print(".... %s" % deleteresult.status_code)
+print(deleteresult.text)
