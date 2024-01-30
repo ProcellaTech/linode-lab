@@ -174,3 +174,15 @@ resource "onepassword_item" "accounting_db" {
   }
 }
 
+resource "null_resource" "eaa_accounting" {
+  depends_on = [linode_instance.accounting_web]
+  
+  provisioner "local-exec" {
+      command = "${path.module}/publish_app.py accounting ${var.domain} ${local.accounting_web_ip} ${data.external.eaa_connector.result.agentid}"
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "${path.module}/unpublish.py accounting"
+  }  
+}
+

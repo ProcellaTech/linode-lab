@@ -174,3 +174,14 @@ resource "onepassword_item" "billing_db" {
   }
 }
 
+resource "null_resource" "eaa_billing" {
+  depends_on = [linode_instance.billing_web]
+  
+  provisioner "local-exec" {
+      command = "${path.module}/publish_app.py billing ${var.domain} ${local.billing_web_ip} ${data.external.eaa_connector.result.agentid}"
+  }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "${path.module}/unpublish.py billing"
+  }  
+}

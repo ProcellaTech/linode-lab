@@ -110,7 +110,7 @@ resource "null_resource" "approve_connector" {
   
   provisioner "local-exec" {
     when    = destroy
-    command = "${path.module}/delete_eaa_connector.sh proxy"
+    command = "${path.module}/delete_eaa_connector.py proxy"
   }
   
 }
