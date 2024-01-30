@@ -69,6 +69,15 @@ resource "linode_domain_record" "proxy_dns_record" {
   target = "${local.proxy_ip}"
 }
 
+# create a DNS record for lab.linode.procellab.zone pointing to the public IP
+resource "linode_domain_record" "lab_dns_record" {
+  domain_id = "${linode_domain.procellab_domain.id}"
+  name = "lab"
+  record_type = "A"
+  ttl_sec = 30
+  target = linode_instance.lab_proxy.ip_address
+}
+
 
 # generate a unique password for root and store it in 1password
 resource "onepassword_item" "proxy_root" {
