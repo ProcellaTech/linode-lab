@@ -86,15 +86,21 @@ connector_payload = {
 
 
 # create app
+print("Creating EAA app for %s" % args.name[0])
 result = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/apps'),json=baseapp_payload)
+print("...... %s" % result.status_code)
 appid=result.json()['uuid_url']
 
+print("adding info")
 updateresult = s.put(urljoin(baseurl, '/crux/v1/mgmt-pop/apps/%s' % appid),json=app_payload)
+print("...... %s" % updateresult.status_code)
 
 
 
 # attach connectors
+print("adding connector")
 connresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/apps/%s/agents' % appid),json=connector_payload)
+print("...... %s" % connresult.status_code)
 
 # attach auth (idp/directory)
 idp_payload = {
@@ -113,13 +119,20 @@ directory_payload = {
    ]
   }
  ]
- } 
+} 
 
+print("adding idp")
 idpresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appidp'),json=idp_payload)
-dirresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appdirectories'),json=directory_payload)
+print("...... %s" % idpresult.status_code)
 
+print("adding directory")
+dirresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appdirectories'),json=directory_payload)
+print("...... %s" % dirresult.status_code)
+
+print("deploying")
 deploy_payload = {
   "deploy_note": "terraform deployment"
 }
 
 deployresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/apps/%s/deploy' % appid),json=deploy_payload)
+print(result)
