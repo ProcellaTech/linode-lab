@@ -37,7 +37,7 @@ resource "linode_instance" "lab_proxy" {
   
   provisioner "local-exec" {
     when    = destroy
-    command = "${path.module}/delete_agent_and_connector.sh ${self.label}"
+    command = "${path.module}/delete_agent.py ${self.label}"
   }
   
 }
@@ -107,4 +107,10 @@ resource "null_resource" "approve_connector" {
   provisioner "local-exec" {
       command = "${path.module}/approve_eaa_connector.py proxy"
   }
+  
+  provisioner "local-exec" {
+    when    = destroy
+    command = "${path.module}/delete_eaa_connector.sh proxy"
+  }
+  
 }
