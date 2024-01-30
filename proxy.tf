@@ -39,6 +39,11 @@ resource "linode_instance" "lab_proxy" {
     when    = destroy
     command = "${path.module}/delete_agent.py ${self.label}"
   }
+  provisioner "local-exec" {
+    when    = destroy
+    command = "${path.module}/delete_eaa_connector.py proxy"
+  }
+  
   
 }
 
@@ -117,9 +122,19 @@ resource "null_resource" "approve_connector" {
       command = "${path.module}/approve_eaa_connector.py proxy"
   }
   
-  provisioner "local-exec" {
-    when    = destroy
-    command = "${path.module}/delete_eaa_connector.py proxy"
-  }
   
+}
+
+
+# all the apps need to be re-deployed once the connector is actually up
+data "external" "deploy_all_apps" {
+  program = [
+    "${path.module}/deploy_all_eaa_apps.py", "${data.external.eaa_connector.result.agentid}",
+  ]
+  query = {
+  }
+}
+
+output "deployed_all_apps" {
+  value = data.external.deploy_all_apps.result
 }
