@@ -54,14 +54,11 @@ baseapp_payload =  {
   "app_profile_id": "Fp3RYok1EeSE6AIy9YR0Dw",
   "name": args.name[0],
   "description": "%s.%s" % (args.name[0], args.domain[0])
-}
+  }
 
 app_payload = {
-  "internal_hostname": "%s.%s" % (args.name[0], args.domain[0]),
-  "host": "%s.%s" % (args.name[0], args.domain[0]),
   "domain": 2,
-  "cname" : "%s-%s.go.akamai-access.com" % (args.name[0],args.domain[0].replace('.','-')),
-  "host" : "%s-%s" % (args.name[0],args.domain[0].replace('.','-')),  
+  "host" : "%s-%s" % (args.name[0],args.domain[0].replace('.','-')),
   "servers": [
     {
       "orig_tls": False, 
@@ -70,6 +67,10 @@ app_payload = {
       "origin_protocol": "http"
     }
   ],
+  "advanced_settings": {
+    "internal_hostname": "%s.%s" % (args.name[0], args.domain[0]),
+    "internal_host_port": 80,
+  },
   "idp": {
     "idp_id" : "e68SQkcvRhuwqrkoglJm3g",
   }
