@@ -58,6 +58,7 @@ baseapp_payload =  {
 
 app_payload = {
   "internal_hostname": "%s.%s" % (args.name[0], args.domain[0]),
+  "host": "%s.%s" % (args.name[0], args.domain[0]),
   "domain": 2,
   "cname" : "%s-%s.go.akamai-access.com" % (args.name[0],args.domain[0].replace('.','-')),
   "host" : "%s-%s" % (args.name[0],args.domain[0].replace('.','-')),  
@@ -128,6 +129,21 @@ directory_payload = {
  ]
 } 
 
+# cheating - i know the group to add
+appgroup_payload = {
+  "data": [
+   {
+    "apps": [appid],
+    "groups": [ 
+      {
+        "uuid_url": "K1qCNOZzRVi7r-b9I03aDQ",
+        "enable_mfa": "inherit"
+      }
+    ]
+   }
+  ]
+}
+
 print("adding idp")
 idpresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appidp'),json=idp_payload)
 print("...... %s" % idpresult.status_code)
@@ -139,6 +155,12 @@ dirresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appdirectories'),json=dir
 print("...... %s" % dirresult.status_code)
 if dirresult.status_code > 299:
     print(dirresult)
+
+print("adding group")
+grpresult = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/appgroups'),json=appgroup_payload)
+print("...... %s" % grpresult.status_code)
+if grpresult.status_code > 299:
+    print(grpresult)
     
 print("deploying")
 deploy_payload = {
