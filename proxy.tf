@@ -104,8 +104,6 @@ data "external" "eaa_connector" {
     "${path.module}/install_eaa_connector.py", "proxy",
   ]
   query = {
-    # You can pass something to STDIN of your program here, 
-    # but as per current version, the input will be given as JSON (map of string)
   }
 }
 
@@ -121,20 +119,32 @@ resource "null_resource" "approve_connector" {
   provisioner "local-exec" {
       command = "${path.module}/approve_eaa_connector.py proxy"
   }
-  
-  
 }
 
-
 # all the apps need to be re-deployed once the connector is actually up
-data "external" "deploy_all_apps" {
-  program = [
-    "${path.module}/deploy_all_eaa_apps.py", "${data.external.eaa_connector.result.agentid}",
-  ]
-  query = {
+resource "null_resource" "deploy_all_apps" {
+  # make sure proxy is up
+  depends_on = [null_resource.approve_connector]
+  
+  provisioner "local-exec" {
+      command = "${path.module}/deploy_all_eaa_apps.py ${data.external.eaa_connector.result.agentid}"
   }
 }
 
-output "deployed_all_apps" {
-  value = data.external.deploy_all_apps.result
-}
+
+
+# all the apps need to be re-deployed once the connector is actually up
+# we don't really need the proxy_ip but it ensures that this isn't attempted to be run until after the proxy is up and running
+# we could also add all the other app IPs but the connector takes so much time that the other ones will be ready to go long before this
+#data "external" "deploy_all_apps" {
+#  program = [
+#    "${path.module}/deploy_all_eaa_apps.py", "${data.external.eaa_connector.result.agentid}",
+#  ]
+#  query = {
+#    proxy_ip = "${linode_instance.lab_proxy.ip_address}"
+#  }
+#}
+#
+#output "deployed_all_apps" {
+#  value = data.external.deploy_all_apps.result
+#}
