@@ -45,5 +45,5 @@ s.auth = EdgeGridAuth(
 )
 
 
-result = s.get(urljoin(baseurl,'/crux/v1/mgmt-pop/apps/%s' % args.app[0]))
+result = s.get(urljoin(baseurl,'/crux/v1/mgmt-pop/apps/%s?expand=true&expand_sdk=true' % args.app[0]))
 print(result.text)
