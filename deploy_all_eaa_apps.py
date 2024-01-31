@@ -62,21 +62,33 @@ if result.status_code > 299:
 #print(result.json())
 if result.json()['state'] != 6:
     # sleep 3 min
+    print("current state is %s" % result.json()['state'])
+    print("sleeping 3 min")
     time.sleep(180)
-    found=0
-    while found == 0:
+    result = s.get(urljoin(baseurl, '/crux/v1/mgmt-pop/agents/%s' % args.connector[0]))
+    if result.json()['state'] != 6:
+      print("current state is %s" % result.json()['state'])
+      print("sleeping 2 min")
+      time.sleep(120)
+      result = s.get(urljoin(baseurl, '/crux/v1/mgmt-pop/agents/%s' % args.connector[0]))
+      if result.json()['state'] != 6:
+        print("current state is %s" % result.json()['state'])
+        print("sleeping 1 min")
+        time.sleep(60)
         result = s.get(urljoin(baseurl, '/crux/v1/mgmt-pop/agents/%s' % args.connector[0]))
-        if result.json()['state'] == 6:
-            found=1
-        else:
-            time.sleep(30)
-
+        if result.json()['state'] != 6:
+          print("current state is %s" % result.json()['state'])
+          print("sleeping 1 more minute then deploying regardless")
+          time.sleep(60)
+          print("Yawn... hopefully that was good enough but things must be broken if it's not done now so run deploy manually if this doesn't work")
 
 # list all apps
+print("Going to deploy all apps")
 result = s.get(urljoin(baseurl, '/crux/v1/mgmt-pop/apps?expand=true'))
 for app in result.json()['objects']:
     for conn in app['agents']:
       if conn['uuid_url'] == args.connector[0]:
+          print("Deploying %s" % app['name'])
           result = s.post(urljoin(baseurl, '/crux/v1/mgmt-pop/apps/%s/deploy' % app['uuid_url']),json=deploy_payload)
           if result.status_code > 299:
               output = {
