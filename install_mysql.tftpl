@@ -14,7 +14,8 @@ grant all privileges on wordpress_db.* to 'wpdb'@'%';
 " | /usr/bin/mysql
 
 TMPNAME=$(echo ${label} | sed 's/-db/.linode.procellab.zone/')
-curl -L https://github.com/ProcellaTech/linode-lab/raw/main/wp.mysql | base64 -d | gunzip -c | sed "s/blog.linode.procellab.zone/$TMPNAME/g" | mysql wordpress_db
+BLOGNAME=$(echo ${label} | sed 's/-db//' | tr 'a-z' 'A-Z')
+curl -L https://github.com/ProcellaTech/linode-lab/raw/main/wp.mysql | base64 -d | gunzip -c | sed "s/Demo blog/$BLOGNAME app/g" | sed "s/blog.linode.procellab.zone/$TMPNAME/g" | mysql wordpress_db
 
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
