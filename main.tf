@@ -67,6 +67,7 @@ resource "linode_domain" "procellab_domain" {
 }
 
 
+data "linode_instances" "all-instances" {}
 
 
 resource "linode_firewall" "my_firewall" {
@@ -81,11 +82,18 @@ resource "linode_firewall" "my_firewall" {
     ipv6     = ["::/0"]
   }
   
+  inbound {
+    label    = "allow-lab"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ipv4     = [linode_vpc_subnet.gc-procellab.ipv4]
+  }
+  
   inbound_policy = "DROP"
 
   outbound_policy = "ACCEPT"
 
-  #linodes = [linode_instance.my_instance.id]
+  linodes = data.linode_instances.all-instances.instances.*.id
 }
 
 
