@@ -107,9 +107,9 @@ data "external" "eaa_connector" {
   }
 }
 
-output "connector" {
-  value = data.external.eaa_connector.result
-}
+#output "connector" {
+#  value = data.external.eaa_connector.result
+#}
 
 # this will approve the EAA connector
 resource "null_resource" "approve_connector" {
