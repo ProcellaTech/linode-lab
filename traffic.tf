@@ -17,7 +17,7 @@ resource "linode_instance" "traffic_generator" {
   }
 
   metadata  {
-    user_data = base64encode(templatefile("${path.module}/install_traffic.tftpl", {label="traffic-generator",accounting_ips=join(" ",local.accounting_ips),billing_ips=join(" ",local.billing_ips),crm_ips=join(" ",local.crm_ips)}))
+    user_data = base64encode(templatefile("${path.module}/install_traffic.tftpl", {label="traffic-generator",accounting_ips=join(" ",local.accounting_ips),billing_ips=join(" ",local.billing_ips),crm_ips=join(" ",local.crm_ips),proxy=local.proxy_ip}))
   }
 }
 

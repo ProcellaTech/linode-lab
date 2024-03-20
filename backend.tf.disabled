@@ -1,0 +1,32 @@
+# store state in linode object storage
+
+
+data "linode_object_storage_cluster" "primary" {
+  id = "us-iad-1"
+}
+
+resource "linode_object_storage_bucket" "tf_state" {
+  cluster = data.linode_object_storage_cluster.primary.id
+  label   = "my-tf-state"
+    access_key = linode_object_storage_key.storagekey.access_key
+  secret_key = linode_object_storage_key.storagekey.secret_key
+  
+}
+
+resource "linode_object_storage_key" "storagekey" {
+    label = "image-access"
+}
+
+
+terraform {
+  backend "s3" {
+    endpoint                   = "https://us-iad-1.linodeobjects.com"
+    profile                     = "linode-s3"
+    skip_credentials_validation = true
+    skip_requesting_account_id = true
+        
+    bucket                      = "my-tf-state"
+    key                         = "infra/state.json"
+    region                      = "us-east-1"
+  }
+}

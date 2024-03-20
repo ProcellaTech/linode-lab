@@ -3,6 +3,7 @@
 
 hostnamectl set-hostname ${label}
 
+echo 'Acquire::http::proxy "https://${proxy}:8443";' > /etc/apt/apt.conf.d/proxy.conf
 apt-get update
 apt-get install -y wordpress
 echo "

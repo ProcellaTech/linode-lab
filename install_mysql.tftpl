@@ -2,6 +2,7 @@
 
 hostnamectl set-hostname ${label}
 
+echo 'Acquire::http::proxy "https://${proxy}:8443";' > /etc/apt/apt.conf.d/proxy.conf
 apt-get update
 apt-get install -y mysql-server
 sed -i 's/bind-address.*$/bind-address      = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
