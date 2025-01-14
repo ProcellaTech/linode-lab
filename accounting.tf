@@ -9,16 +9,12 @@ resource "linode_instance" "accounting_app" {
   root_pass = onepassword_item.accounting_app_root.password
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="accounting-app",wppw=onepassword_item.accounting_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.accounting_db_ip,domain=var.domain, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="accounting-app",wppw=onepassword_item.accounting_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.accounting_db_ip,domain=var.domain, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -40,16 +36,12 @@ resource "linode_instance" "accounting_db" {
 
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="accounting-db",wppw=onepassword_item.accounting_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="accounting-db",wppw=onepassword_item.accounting_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -68,16 +60,12 @@ resource "linode_instance" "accounting_web" {
   root_pass = onepassword_item.accounting_web_root.password
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="accounting-web",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.accounting_app_ip, wordpressname="accounting-app.${var.domain}",proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="accounting-web",gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.accounting_app_ip, wordpressname="accounting-app.${var.domain}",proxy=local.proxy_ip}))
   }
   provisioner "local-exec" {
     when    = destroy
@@ -115,13 +103,11 @@ data "linode_instances" "accounting_db" {
 
 
 
-
-
 # variables to hold IP addresses
 locals {
-  accounting_app_ip = data.linode_instances.accounting_app.instances.0.config.0.interface.1.ipv4.0.vpc
-  accounting_web_ip = data.linode_instances.accounting_web.instances.0.config.0.interface.1.ipv4.0.vpc
-  accounting_db_ip = data.linode_instances.accounting_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  accounting_app_ip = data.linode_instances.accounting_app.instances.0.config.0.interface.0.ipv4.0.vpc
+  accounting_web_ip = data.linode_instances.accounting_web.instances.0.config.0.interface.0.ipv4.0.vpc
+  accounting_db_ip = data.linode_instances.accounting_db.instances.0.config.0.interface.0.ipv4.0.vpc
   accounting_ips = concat([local.accounting_app_ip],[local.accounting_web_ip],[local.accounting_db_ip])
 }
 
