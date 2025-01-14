@@ -20,7 +20,7 @@ variable "image" {
 
 variable "region" {
   description = "The region where your Linode will be located."
-  default = "us-iad"
+  default = "us-mia"
 }
 
 variable "type" {
@@ -28,8 +28,8 @@ variable "type" {
   default = "g6-nanode-1"
 }
 
-variable "gcagg_ip" {
-  description = "IP address of GC aggregator - password in 1password"
-  default = "34.121.212.145"
+variable "gcagg_hostname" {
+  description = "hostname of GC aggregator - password in 1password"
+  default = "aggr-customer-20009430.cloud.guardicore.com"
 }
 
