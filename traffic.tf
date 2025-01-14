@@ -8,10 +8,6 @@ resource "linode_instance" "traffic_generator" {
   root_pass = onepassword_item.traffic_root.password
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }

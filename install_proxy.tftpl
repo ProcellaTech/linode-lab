@@ -5,30 +5,53 @@ hostnamectl set-hostname ${label}
 
 apt-get update
 
-apt-get install -y tinyproxy docker.io
+apt-get install -y apache2 docker.io
 
 
 echo '
-User tinyproxy
-Group tinyproxy
-Timeout 600
-LogFile "/var/log/tinyproxy/tinyproxy.log"
-LogLevel Info
-PidFile "/run/tinyproxy/tinyproxy.pid"
-ConnectPort 443
+<IfModule mod_proxy.c>
 
-Port 8443
-Allow 10.0.4.0/24
-' > /etc/tinyproxy/tinyproxy.conf
+ProxyRequests On
+<Proxy *>
+    AddDefaultCharset Off
+    Order deny,allow
+    Deny from all
+    Allow from 10.0.4.0/24
+</Proxy>
 
-touch /var/log/tinyproxy/tinyproxy.log
-chown tinyproxy.tinyproxy /var/log/tinyproxy/tinyproxy.log
 
-systemctl restart tinyproxy
+</IfModule>
+' > /etc/apache2/mods-available/proxy.conf
+
+echo '
+<VirtualHost *:8080>
+	ServerName proxy
+	DocumentRoot /var/www/html
+	ErrorLog /var/log/apache2/error.log
+	CustomLog /var/log/apache2/access.log combined
+	ProxyRequests On
+	ProxyVia On
+	<Proxy "*">
+		Allow from all
+	 </Proxy>
+
+</VirtualHost>
+' > /etc/apache2/sites-available/000-default.conf
+
+echo '
+Listen 8080
+' > /etc/apache2/ports.conf
+
+cd /etc/apache2/mods-available
+a2enmod proxy proxy_http proxy_connect
+
+apachectl restart
+
 
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
-wget https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
+export SSL_ADDRESSES="${gcagg}"
+wget  https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
 # expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
 SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`
 export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://${gcagg} | sudo -E bash'

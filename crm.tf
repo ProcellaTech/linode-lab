@@ -9,16 +9,12 @@ resource "linode_instance" "crm_app" {
   root_pass = onepassword_item.crm_app_root.password
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="crm-app",wppw=onepassword_item.crm_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.crm_db_ip,domain=var.domain, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="crm-app",wppw=onepassword_item.crm_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.crm_db_ip,domain=var.domain, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -40,16 +36,12 @@ resource "linode_instance" "crm_db" {
 
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="crm-db",wppw=onepassword_item.crm_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="crm-db",wppw=onepassword_item.crm_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -67,17 +59,14 @@ resource "linode_instance" "crm_web" {
   authorized_keys = [ linode_sshkey.procellab_sshkey.ssh_key ]
   root_pass = onepassword_item.crm_web_root.password
 
-  interface {
-    purpose = "public"
-  }
-
+  
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="crm-web",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.crm_app_ip, wordpressname="crm-app.${var.domain}",proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="crm-web",gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.crm_app_ip, wordpressname="crm-app.${var.domain}",proxy=local.proxy_ip}))
   }
   provisioner "local-exec" {
     when    = destroy
@@ -119,9 +108,9 @@ data "linode_instances" "crm_db" {
 
 # variables to hold IP addresses
 locals {
-  crm_app_ip = data.linode_instances.crm_app.instances.0.config.0.interface.1.ipv4.0.vpc
-  crm_web_ip = data.linode_instances.crm_web.instances.0.config.0.interface.1.ipv4.0.vpc
-  crm_db_ip = data.linode_instances.crm_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  crm_app_ip = data.linode_instances.crm_app.instances.0.config.0.interface.0.ipv4.0.vpc
+  crm_web_ip = data.linode_instances.crm_web.instances.0.config.0.interface.0.ipv4.0.vpc
+  crm_db_ip = data.linode_instances.crm_db.instances.0.config.0.interface.0.ipv4.0.vpc
   crm_ips = concat([local.crm_app_ip],[local.crm_web_ip],[local.crm_db_ip])
 }
 

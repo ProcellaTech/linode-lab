@@ -9,16 +9,12 @@ resource "linode_instance" "billing_app" {
   root_pass = onepassword_item.billing_app_root.password
 
   interface {
-    purpose = "public"
-  }
-
-  interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="billing-app",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.billing_db_ip,domain=var.domain, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_wordpress.tftpl", {label="billing-app",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,mysqlip=local.billing_db_ip,domain=var.domain, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -39,17 +35,14 @@ resource "linode_instance" "billing_db" {
   root_pass = onepassword_item.billing_db_root.password
 
 
-  interface {
-    purpose = "public"
-  }
-
+  
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="billing-db",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_mysql.tftpl", {label="billing-db",wppw=onepassword_item.billing_db.password,gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password, proxy=local.proxy_ip}))
   }
   
   provisioner "local-exec" {
@@ -67,17 +60,14 @@ resource "linode_instance" "billing_web" {
   authorized_keys = [ linode_sshkey.procellab_sshkey.ssh_key ]
   root_pass = onepassword_item.billing_web_root.password
 
-  interface {
-    purpose = "public"
-  }
-
+  
   interface {
     purpose = "vpc"
     subnet_id = linode_vpc_subnet.gc-procellab.id
   }
 
   metadata  {
-  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="billing-web",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.billing_app_ip, wordpressname="billing-app.${var.domain}",proxy=local.proxy_ip}))
+  user_data = base64encode(templatefile("${path.module}/install_nginx.tftpl", {label="billing-web",gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,wordpressip=local.billing_app_ip, wordpressname="billing-app.${var.domain}",proxy=local.proxy_ip}))
   }
   provisioner "local-exec" {
     when    = destroy
@@ -119,9 +109,9 @@ data "linode_instances" "billing_db" {
 
 # variables to hold IP addresses
 locals {
-  billing_app_ip = data.linode_instances.billing_app.instances.0.config.0.interface.1.ipv4.0.vpc
-  billing_web_ip = data.linode_instances.billing_web.instances.0.config.0.interface.1.ipv4.0.vpc
-  billing_db_ip = data.linode_instances.billing_db.instances.0.config.0.interface.1.ipv4.0.vpc
+  billing_app_ip = data.linode_instances.billing_app.instances.0.config.0.interface.0.ipv4.0.vpc
+  billing_web_ip = data.linode_instances.billing_web.instances.0.config.0.interface.0.ipv4.0.vpc
+  billing_db_ip = data.linode_instances.billing_db.instances.0.config.0.interface.0.ipv4.0.vpc
   billing_ips = concat([local.billing_app_ip],[local.billing_web_ip],[local.billing_db_ip])
 }
 

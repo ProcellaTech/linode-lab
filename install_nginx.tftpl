@@ -3,7 +3,8 @@
 
 hostnamectl set-hostname ${label}
 
-echo 'Acquire::http::proxy "https://${proxy}:8443";' > /etc/apt/apt.conf.d/proxy.conf
+echo 'Acquire::http::proxy "http://${proxy}:8080";' > /etc/apt/apt.conf.d/proxy.conf
+echo 'Acquire::https::proxy "http://${proxy}:8080";' >> /etc/apt/apt.conf.d/proxy.conf
 apt-get update
 apt-get install -y nginx
 
@@ -25,13 +26,11 @@ systemctl restart nginx
 
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
-export GC_PROXY_HTTPS='${proxy}:8443'
-wget https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
+export SSL_ADDRESSES="${gcagg}"
+export GC_PROXY_HTTPS='${proxy}:8080'
+wget -e use_proxy=yes -e https_proxy=http://${proxy}:8080/ https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
 # expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
 SHA256SUM_VALUE=`sha256sum /tmp/guardicore_cas_chain_file.pem | awk '{print $1;}'`
-export INSTALLATION_CMD='wget --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://${gcagg} | sudo -E bash'
+export INSTALLATION_CMD='wget -e use_proxy=yes -e https_proxy=http://${proxy}:8080/ --ca-certificate /tmp/guardicore_cas_chain_file.pem -O- https://${gcagg} | sudo -E bash'
 if [ $SHA256SUM_VALUE == 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d ]; then eval $INSTALLATION_CMD; else echo "Certificate checksum mismatch error"; fi
 
-
-# now disable eth0
-ip link set eth0 down

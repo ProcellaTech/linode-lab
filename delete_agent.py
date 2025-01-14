@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.12
 #  -*- coding: utf-8 -*-
 
 # Use future for Python v2 and v3 compatibility
@@ -66,6 +66,7 @@ def gc_authenticate():
    r = requests.post(URL, json=auth_string)
    if r.status_code != 200:
       sys.exit( "Error %d obtaining access token for %s" % (r.status_code,URL))
+
    return r.json()['access_token']
 
 
@@ -73,6 +74,7 @@ def gc_assets(host):
 
   result=gc_get("/assets?status=on")
 
+  print(result)
   assets=[]
   for a in result.json()['objects']:
       if a['name'] == host or a['name'] == host.replace('_','-'):
@@ -109,8 +111,10 @@ if __name__ == '__main__':
         GC_PASS = u['value']
 
 
+   AUTH_TOKEN=gc_authenticate()
    assets=gc_assets(args.name[0])
    if len(assets) > 0:
-     gc_bulk_deactivate_asset(assets)
+       print("We would deactivate the assets here but that might mean we can't recrate them?")
+   #  gc_bulk_deactivate_asset(assets)
 
 

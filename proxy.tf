@@ -32,7 +32,7 @@ resource "linode_instance" "lab_proxy" {
   }
 
   metadata  {
-    user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {label="proxy",gcagg=var.gcagg_ip,gcuium=data.onepassword_item.gcuium.password,eaaconn=data.external.eaa_connector.result.download_url}))
+    user_data = base64encode(templatefile("${path.module}/install_proxy.tftpl", {label="proxy",gcagg=var.gcagg_hostname,gcuium=data.onepassword_item.gcuium.password,eaaconn=data.external.eaa_connector.result.download_url}))
   }
   
   provisioner "local-exec" {
