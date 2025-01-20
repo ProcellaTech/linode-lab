@@ -31,10 +31,14 @@ echo '
 	CustomLog /var/log/apache2/access.log combined
 	ProxyRequests On
 	ProxyVia On
-	<Proxy "*">
-		Allow from all
-	 </Proxy>
-
+        <Proxy "*">
+                Order Deny,Allow
+                Deny from all
+                Allow from 10.0.4.0/24
+         </Proxy>
+        <Location />
+            Require ip 10.0.4.0/24
+        </Location>
 </VirtualHost>
 ' > /etc/apache2/sites-available/000-default.conf
 
