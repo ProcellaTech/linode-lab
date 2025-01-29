@@ -2,7 +2,7 @@
 
 
 data "linode_object_storage_cluster" "primary" {
-  id = "us-iad-1"
+  id = "us-mia-1"
 }
 
 resource "linode_object_storage_bucket" "tf_state" {
@@ -20,13 +20,13 @@ resource "linode_object_storage_key" "storagekey" {
 
 terraform {
   backend "s3" {
-    endpoint                   = "https://us-iad-1.linodeobjects.com"
+    endpoint                   = "https://us-mia-1.linodeobjects.com"
     profile                     = "linode-s3"
     skip_credentials_validation = true
     skip_requesting_account_id = true
         
     bucket                      = "my-tf-state"
     key                         = "infra/state.json"
-    region                      = "us-east-1"
+    region                      = "us-mia-1"
   }
 }
