@@ -114,7 +114,7 @@ if __name__ == '__main__':
    AUTH_TOKEN=gc_authenticate()
    assets=gc_assets(args.name[0])
    if len(assets) > 0:
-       print("We would deactivate the assets here but that might mean we can't recrate them?")
-   #  gc_bulk_deactivate_asset(assets)
+   #    print("We would deactivate the assets here but that might mean we can't recrate them?")
+     gc_bulk_deactivate_asset(assets)
 
 
