@@ -24,9 +24,10 @@ server {
 
 systemctl restart nginx
 
+export DAEMON_ARGS='--verbose'
 export UI_UM_PASSWORD='${gcuium}'
 export GC_PROFILE='default'
-export SSL_ADDRESSES="${gcagg}"
+export SSL_ADDRESSES="${gcagg}:443"
 export GC_PROXY_HTTPS='${proxy}:8080'
 wget -e use_proxy=yes -e https_proxy=http://${proxy}:8080/ https://${gcagg}/guardicore-cas-chain-file.pem --no-check-certificate -O /tmp/guardicore_cas_chain_file.pem
 # expected checksum 89e287fc3de1c0ab328185e61a0e8a241974437ca4928a834aa7fada9fbd618d
